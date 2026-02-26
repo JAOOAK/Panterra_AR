@@ -71,7 +71,7 @@
     </div>
 
     <a-scene 
-        webxr="optionalFeatures: hit-test, dom-overlay; overlayElement: #ar-ui" 
+        webxr="requiredFeatures: hit-test, dom-overlay; overlayElement: #ar-ui" 
         ar-hit-test="target:#reticle"
         background="transparent: true"
         renderer="alpha: true; colorManagement: true;"
@@ -93,7 +93,6 @@
     </a-scene>
 
     <script>
-        // ⚠️ จุดนี้สำคัญ: เช็คให้ชัวร์ว่าชื่อไฟล์ในนี้ ตรงกับชื่อไฟล์บน GitHub เป๊ะๆ!
         const furnitureData = [
             { id: 1, name: "Modern Sofa", image: "assets/images/sofa.png", modelFile: "assets/models/sofa.glb" },
             { id: 4, name: "Dining Chair", image: "assets/images/wooden_dining_chair.png", modelFile: "assets/models/wooden_dining_chair.glb" },
