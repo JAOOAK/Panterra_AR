@@ -22,6 +22,12 @@
         .btn-ar-force { background: #4CAF50; color: white; border: none; box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4); }
         .btn-ar-force:hover { background: #388E3C; transform: translateY(-3px); }
 
+        /* 🔴 หน้าจอแจ้งเตือนถ้าเปิดผ่าน LINE หรือแอปแชท */
+        #line-warning { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #f44336; color: white; z-index: 9999; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 30px; box-sizing: border-box; }
+        #line-warning h2 { font-size: 1.8rem; margin-bottom: 15px; }
+        #line-warning p { font-size: 1.1rem; line-height: 1.5; margin-bottom: 15px; }
+        .chrome-icon { font-size: 4rem; margin-bottom: 20px; }
+
         .a-enter-vr-button { display: none !important; }
 
         #ar-ui { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 999; display: none; }
@@ -50,6 +56,15 @@
 </head>
 <body>
 
+    <div id="line-warning">
+        <div class="chrome-icon">🌐</div>
+        <h2>ใช้งาน AR ในแอปนี้ไม่ได้!</h2>
+        <p>คุณกำลังเปิดเว็บผ่านแอปแชท (เช่น LINE หรือ FB) ซึ่งแอปเหล่านี้จะ **บล็อกกล้อง AR** ทำให้จอดำครับ</p>
+        <p style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px; margin-top: 20px; font-weight: bold;">
+            วิธีแก้ให้กล้องติด 100%:<br><br>กดจุด 3 จุดที่มุมขวาบน ↗️<br>แล้วเลือก "เปิดในเบราว์เซอร์"<br>(หรือก๊อปปี้ลิงก์ไปเปิดใน Chrome เท่านั้น)
+        </p>
+    </div>
+
     <div id="start-screen">
         <h1>PAN TERRA AR</h1>
         <p>สร้างห้องในฝัน วางเฟอร์นิเจอร์ได้หลายชิ้น</p>
@@ -72,6 +87,7 @@
     </div>
 
     <a-scene 
+        xr-mode-ui="enabled: false"
         webxr="requiredFeatures: hit-test, dom-overlay; overlayElement: #ar-ui" 
         ar-hit-test="target:#reticle"
         renderer="alpha: true; colorManagement: true;"
@@ -93,7 +109,17 @@
     </a-scene>
 
     <script>
-        // 🟢 เปลี่ยนมาใช้ icon แบบ Emoji แทน image แล้วครับ
+        // ระบบตรวจจับว่ากำลังเปิดใน LINE หรือไม่
+        function checkBrowser() {
+            const ua = navigator.userAgent || navigator.vendor || window.opera;
+            if (ua.indexOf("Line") > -1 || ua.indexOf("FBAN") > -1 || ua.indexOf("FBAV") > -1 || ua.indexOf("Instagram") > -1) {
+                document.getElementById('line-warning').style.display = 'flex';
+                document.getElementById('start-screen').style.display = 'none';
+                return false;
+            }
+            return true;
+        }
+
         const furnitureData = [
             { id: 1, name: "Modern Sofa", icon: "🛋️", modelFile: "assets/models/sofa.glb" },
             { id: 4, name: "Dining Chair", icon: "🪑", modelFile: "assets/models/wooden_dining_chair.glb" },
@@ -108,6 +134,9 @@
         let movingEntity = null; 
 
         function initCatalog() {
+            // ถ้าอยู่ในแอปแชท ให้หยุดการทำงานไปเลย
+            if (!checkBrowser()) return; 
+
             const catalogList = document.getElementById('catalog-list');
             const assetsContainer = document.getElementById('model-assets');
 
@@ -120,7 +149,6 @@
                 const btn = document.createElement('div');
                 btn.className = `catalog-item ${index === 0 ? 'active' : ''}`;
                 
-                // 🟢 เรนเดอร์ด้วย Emoji
                 btn.innerHTML = `
                     <div class="catalog-icon">${item.icon}</div>
                     <div class="catalog-name">${item.name}</div>
