@@ -26,11 +26,9 @@
 
         #instruction-text { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); background: rgba(255,255,255,0.95); padding: 10px 20px; border-radius: 20px; font-weight: bold; color: #e65100; white-space: nowrap; backdrop-filter: blur(5px); box-shadow: 0 4px 10px rgba(0,0,0,0.1); font-size: 1.1rem; text-align: center; line-height: 1.4;}
 
-        /* ปุ่มวางของ */
         #btn-place { position: absolute; bottom: 150px; left: 50%; transform: translateX(-50%); background: #4CAF50; color: white; padding: 15px 40px; border-radius: 50px; font-size: 1.3rem; font-family: 'Kanit'; font-weight: bold; border: none; box-shadow: 0 5px 20px rgba(76, 175, 80, 0.4); pointer-events: auto; display: none; cursor: pointer; animation: pulse 1.5s infinite; }
         @keyframes pulse { 0% { transform: translateX(-50%) scale(1); } 50% { transform: translateX(-50%) scale(1.05); } 100% { transform: translateX(-50%) scale(1); } }
 
-        /* 🟢 เมนูเครื่องมือแก้ไข (ปรับให้มีปุ่มย้ายตำแหน่ง) */
         #edit-menu { position: absolute; top: 80px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; pointer-events: auto; background: rgba(255, 255, 255, 0.95); padding: 10px 15px; border-radius: 50px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); opacity: 0; visibility: hidden; transition: all 0.3s ease; white-space: nowrap; }
         #edit-menu.show { opacity: 1; visibility: visible; }
         .btn-edit { background: #f5f5f5; border: 1px solid #ddd; font-size: 1rem; cursor: pointer; padding: 8px 12px; color: #5d4037; border-radius: 30px; font-family: 'Kanit'; font-weight: 600; display: flex; align-items: center; gap: 5px; transition: 0.2s;}
@@ -40,7 +38,6 @@
         .btn-move { color: white; background: #2196F3; border: none; }
         .btn-move:active { background: #1976D2; }
 
-        /* แคตตาล็อกสินค้า */
         #catalog-menu { position: absolute; bottom: 30px; left: 0; width: 100%; padding: 0 20px; box-sizing: border-box; pointer-events: auto; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; }
         .catalog-container { display: inline-flex; gap: 15px; padding-bottom: 15px; }
         .catalog-item { background: rgba(255, 255, 255, 0.95); border: 2px solid transparent; border-radius: 15px; padding: 15px; width: 100px; text-align: center; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.1); transition: 0.3s; display: flex; flex-direction: column; align-items: center; justify-content: center; white-space: normal;}
@@ -60,25 +57,22 @@
 
     <div id="ar-ui">
         <div id="instruction-text">⏳ กำลังสแกนหาพื้น... (ขยับมือถือซ้ายขวาช้าๆ)</div>
-        
         <button id="btn-place" onclick="placeFurniture()">👇 วางตรงนี้</button>
-
         <div id="edit-menu">
             <button class="btn-edit" onclick="rotateSelected(-45)">↺ หมุนซ้าย</button>
             <button class="btn-edit btn-move" onclick="startMovingSelected()">📍 ย้ายที่</button>
             <button class="btn-edit" onclick="rotateSelected(45)">↻ หมุนขวา</button>
             <button class="btn-edit btn-delete" onclick="deleteSelected()">🗑️ ลบ</button>
         </div>
-        
         <div id="catalog-menu">
             <div class="catalog-container" id="catalog-list"></div>
         </div>
     </div>
 
     <a-scene 
-        webxr="requiredFeatures: hit-test, dom-overlay; overlayElement: #ar-ui" 
+        webxr="optionalFeatures: hit-test, dom-overlay; overlayElement: #ar-ui" 
         ar-hit-test="target:#reticle"
-        renderer="colorManagement: true;"
+        renderer="alpha: true; colorManagement: true;"
         ar-planner-system>
         
         <a-assets id="model-assets"></a-assets>
@@ -107,7 +101,7 @@
 
         let currentModelToPlace = '';
         let selectedEntity = null;
-        let movingEntity = null; // 🟢 ตัวแปรสำหรับจำว่ากำลัง "ย้าย" ของชิ้นไหนอยู่
+        let movingEntity = null; 
 
         function initCatalog() {
             const catalogList = document.getElementById('catalog-list');
@@ -132,7 +126,6 @@
                     btn.classList.add('active');
                     currentModelToPlace = `#model-${item.id}`;
                     
-                    // ถ้าย้ายของอยู่แล้วไปกดแคตตาล็อก ให้วางของเก่าลงก่อน
                     if(movingEntity) placeFurniture(); 
                     deselectCurrent();
                 };
@@ -143,9 +136,14 @@
         }
 
         function forceStartAR() {
+            let sceneEl = document.querySelector('a-scene');
             let arBtn = document.querySelector('.a-enter-ar-button');
-            if (arBtn) { arBtn.click(); } 
-            else { document.querySelector('a-scene').enterAR(); }
+            if (arBtn) { 
+                arBtn.click(); 
+            } else if (sceneEl.systems.webxr) { 
+                // บังคับเข้าโหมด AR เท่านั้น ห้ามใช้ enterVR เด็ดขาด!
+                sceneEl.enterAR(); 
+            }
         }
 
         AFRAME.registerComponent('ar-planner-system', {
@@ -171,7 +169,6 @@
                     if (reticle.object3D.visible) {
                         btnPlace.style.display = 'block';
                         
-                        // 🟢 ถ้ากำลัง "ย้าย" โมเดลอยู่ ให้มันขยับตามเป้าเล็งสีเขียว!
                         if (movingEntity) {
                             const pos = reticle.object3D.position;
                             movingEntity.setAttribute('position', {x: pos.x, y: pos.y, z: pos.z});
@@ -195,13 +192,11 @@
             }
         });
 
-        // 🟢 ฟังก์ชันวางของ (ควบรวมทั้งวางของใหม่ และ วางของที่ย้ายมา)
         function placeFurniture() {
             const reticle = document.getElementById('reticle');
             if (!reticle.object3D.visible) return;
 
             if (movingEntity) {
-                // ถ้ากำลังย้ายอยู่ พอกดปุ่มนี้ คือการ "ปล่อยของลงพื้น"
                 movingEntity = null;
                 document.getElementById('instruction-text').innerHTML = "✅ วางสำเร็จ!<br>ใช้นิ้วแตะที่โมเดล เพื่อแก้ไข/หมุน/ลบ";
                 document.getElementById('instruction-text').style.color = "#4CAF50";
@@ -217,7 +212,7 @@
             newFurniture.setAttribute('position', {x: pos.x, y: pos.y, z: pos.z});
             newFurniture.setAttribute('shadow', 'receive: false; cast: true');
             newFurniture.setAttribute('scale', '1 1 1');
-            newFurniture.setAttribute('class', 'furniture'); // ติดแท็กไว้ให้เลเซอร์สแกนเจอ
+            newFurniture.setAttribute('class', 'furniture');
 
             document.querySelector('a-scene').appendChild(newFurniture);
             
@@ -225,30 +220,25 @@
             document.getElementById('instruction-text').style.color = "#4CAF50";
         }
 
-        // 🟢 ระบบเลเซอร์ยิงจากนิ้ว (แก้ปัญหาแตะโมเดลไม่ติด 100%)
         window.addEventListener('touchstart', function(e) {
-            if (movingEntity) return; // ถ้าขยับของอยู่ ห้ามกดเลือกของอื่น
+            if (movingEntity) return;
             
-            // ตรวจสอบว่าไม่ได้เผลอไปกดโดนปุ่ม UI ต่างๆ
             if (e.touches.length === 1 && e.target.tagName !== 'BUTTON' && !e.target.closest('#catalog-menu') && !e.target.closest('#edit-menu')) {
                 
                 let touch = e.touches[0];
                 let mouse = new THREE.Vector2();
-                // แปลงจุดที่นิ้วแตะ ให้เป็นพิกัด 3D
                 mouse.x = (touch.clientX / window.innerWidth) * 2 - 1;
                 mouse.y = -(touch.clientY / window.innerHeight) * 2 + 1;
                 
                 let sceneEl = document.querySelector('a-scene');
                 let raycaster = new THREE.Raycaster();
-                raycaster.setFromCamera(mouse, sceneEl.camera); // ยิงเลเซอร์จากกล้องทะลุนิ้ว
+                raycaster.setFromCamera(mouse, sceneEl.camera);
                 
-                // ค้นหาว่าเลเซอร์ชนกับอะไรในฉากบ้าง
                 let intersects = raycaster.intersectObjects(sceneEl.object3D.children, true);
                 
                 let clickedFurniture = null;
                 for(let i=0; i<intersects.length; i++) {
                     let obj = intersects[i].object;
-                    // ไต่ขึ้นไปหาตัวแม่ที่มีคลาส furniture
                     while(obj) {
                         if (obj.el && obj.el.classList && obj.el.classList.contains('furniture')) {
                             clickedFurniture = obj.el;
@@ -262,7 +252,7 @@
                 if (clickedFurniture) {
                     selectFurniture(clickedFurniture);
                 } else {
-                    deselectCurrent(); // ถ้าแตะโดนพื้นว่างๆ ให้ยกเลิกการเลือก
+                    deselectCurrent();
                 }
             }
         }, {passive: true});
@@ -271,12 +261,12 @@
             selectedEntity = entity;
             const ring = document.getElementById('selection-ring');
             ring.setAttribute('visible', 'true');
-            entity.appendChild(ring); // ย้ายวงแหวนไปอยู่ใต้ของที่เลือก
+            entity.appendChild(ring); 
             
             document.getElementById('edit-menu').classList.add('show');
             document.getElementById('instruction-text').innerText = "🛠️ เลือกเฟอร์นิเจอร์แล้ว สามารถย้าย หมุน หรือลบได้";
             document.getElementById('instruction-text').style.color = "#5d4037";
-            document.getElementById('btn-place').style.display = 'none'; // ซ่อนปุ่มวางชั่วคราว
+            document.getElementById('btn-place').style.display = 'none'; 
         }
 
         function deselectCurrent() {
@@ -284,15 +274,14 @@
             selectedEntity = null;
             const ring = document.getElementById('selection-ring');
             ring.setAttribute('visible', 'false');
-            document.querySelector('a-scene').appendChild(ring); // คืนวงแหวนกลับสู่ฉากหลัก
+            document.querySelector('a-scene').appendChild(ring); 
             document.getElementById('edit-menu').classList.remove('show');
         }
 
-        // 🟢 ฟังก์ชันใหม่: สั่งย้ายตำแหน่ง
         function startMovingSelected() {
             if (!selectedEntity) return;
-            movingEntity = selectedEntity; // เปลี่ยนสถานะเป็น "กำลังย้าย"
-            deselectCurrent(); // ปิดเมนูและวงแหวน
+            movingEntity = selectedEntity; 
+            deselectCurrent(); 
             
             document.getElementById('instruction-text').innerHTML = "เล็งหาพื้นที่ใหม่...<br>แล้วกดปุ่ม '✅ วางตำแหน่งนี้'";
             document.getElementById('instruction-text').style.color = "#2196F3";
