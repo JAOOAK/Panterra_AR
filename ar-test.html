@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>ทดสอบ AR วางหลายชิ้น</title>
+  
+  <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+
+  <style>
+    /* ตกแต่งปุ่มเมนูให้ลอยอยู่บนหน้ากล้อง AR */
+    .ui-container {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 9999;
+      display: flex;
+      gap: 15px;
+      background: rgba(255, 255, 255, 0.8);
+      padding: 15px;
+      border-radius: 20px;
+      backdrop-filter: blur(10px);
+    }
+    .btn {
+      padding: 10px 20px;
+      background: #5d4037;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-family: 'Kanit', sans-serif;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+    .btn:hover { background: #8d6e63; }
+    
+    /* ซ่อนปุ่มเข้า VR (เราจะใช้แค่ AR) */
+    .a-enter-vr { display: none !important; }
+  </style>
+
+  <script>
+    // ตัวแปรเก็บว่าตอนนี้ลูกค้าเลือกเฟอร์นิเจอร์ชิ้นไหนอยู่
+    let currentModel = '#model-sofa'; 
+
+    // ฟังก์ชันเปลี่ยนของที่ต้องการวาง
+    function selectModel(modelId) {
+      currentModel = modelId;
+      alert("✅ เลือกโมเดลแล้ว! ให้ส่องกล้องหาพื้นราบ แล้วแตะหน้าจอเพื่อวางเลยครับ");
+    }
+
+    // โค้ดสำหรับระบบ "แตะหน้าจอเพื่อวางของ" (Tap to place)
+    AFRAME.registerComponent('tap-place', {
+      init: function () {
+        const reticle = document.getElementById('reticle'); // เป้าเล็ง
+        const sceneEl = this.el;
+
+        // เมื่อผู้ใช้ใช้นิ้วแตะหน้าจอ
+        sceneEl.addEventListener('select', (event) => {
+          // ถ้าเป้าเล็งยังไม่ปรากฏ (ยังหาพื้นไม่เจอ) ให้หยุดการทำงาน
+          if (!reticle.getAttribute('visible')) return;
+
+          // สร้างเฟอร์นิเจอร์ชิ้นใหม่ขึ้นมา
+          const newFurniture = document.createElement('a-entity');
+          newFurniture.setAttribute('gltf-model', currentModel); // โหลดไฟล์ที่เลือกไว้
+          newFurniture.setAttribute('position', reticle.getAttribute('position')); // วางตรงเป้าเล็ง
+          newFurniture.setAttribute('scale', '1 1 1'); // ขนาดโมเดล (ปรับได้ถ้าเล็ก/ใหญ่ไป)
+          newFurniture.setAttribute('shadow', 'receive: true; cast: true');
+
+          // จับใส่ลงในฉาก AR
+          sceneEl.appendChild(newFurniture);
+        });
+      }
+    });
+  </script>
+</head>
+<body>
+
+  <div class="ui-container">
+    <button class="btn" onclick="selectModel('#model-sofa')">วางโซฟา 🛋️</button>
+    <button class="btn" onclick="selectModel('#model-table')">วางโต๊ะ 🪵</button>
+  </div>
+
+  <a-scene tap-place webxr="optionalFeatures: hit-test, local-floor;" ar-hit-test="target:#reticle;">
+    
+    <a-assets>
+      <a-asset-item id="model-sofa" src="assets/models/sofa.glb"></a-asset-item>
+      <a-asset-item id="model-table" src="assets/models/table_ronde.glb"></a-asset-item>
+    </a-assets>
+
+    <a-camera position="0 1.6 0"></a-camera>
+
+    <a-entity id="reticle" visible="false">
+      <a-ring color="#4CAF50" radius-inner="0.1" radius-outer="0.15" rotation="-90 0 0"></a-ring>
+    </a-entity>
+
+    <a-light type="ambient" color="#ffffff" intensity="0.6"></a-light>
+    <a-light type="directional" color="#ffffff" intensity="0.8" position="1 2 1"></a-light>
+
+  </a-scene>
+
+</body>
+</html>

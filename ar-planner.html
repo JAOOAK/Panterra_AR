@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>PAN TERRA - AR Room Planner</title>
+
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap');
+        body, html { margin: 0; padding: 0; font-family: 'Kanit', sans-serif; overflow: hidden; background-color: transparent !important;}
+        
+        #start-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100; background: linear-gradient(135deg, #fdfbf7 0%, #eaddcf 100%); text-align: center; padding: 20px; box-sizing: border-box;}
+        #start-screen h1 { color: #5d4037; font-size: 2.5rem; margin-bottom: 10px; }
+        #start-screen p { color: #8d6e63; font-size: 1.1rem; margin-bottom: 20px; }
+        
+        .btn-start { background: white; color: #5d4037; border: 2px solid #5d4037; padding: 15px 30px; font-size: 1.1rem; border-radius: 50px; font-family: 'Kanit'; cursor: pointer; transition: 0.3s; margin: 10px; font-weight: bold; width: 250px;}
+        .btn-start:hover { background: #5d4037; color: white; }
+        .btn-ar-force { background: #4CAF50; color: white; border: none; box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4); }
+        .btn-ar-force:hover { background: #388E3C; transform: translateY(-3px); }
+
+        .a-enter-vr-button { display: none !important; }
+
+        #ar-ui { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 999; display: none; }
+
+        #instruction-text { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); background: rgba(255,255,255,0.95); padding: 10px 20px; border-radius: 20px; font-weight: bold; color: #e65100; white-space: nowrap; backdrop-filter: blur(5px); box-shadow: 0 4px 10px rgba(0,0,0,0.1); font-size: 1.1rem; text-align: center; line-height: 1.4;}
+
+        /* ปุ่มวางของ */
+        #btn-place { position: absolute; bottom: 150px; left: 50%; transform: translateX(-50%); background: #4CAF50; color: white; padding: 15px 40px; border-radius: 50px; font-size: 1.3rem; font-family: 'Kanit'; font-weight: bold; border: none; box-shadow: 0 5px 20px rgba(76, 175, 80, 0.4); pointer-events: auto; display: none; cursor: pointer; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { transform: translateX(-50%) scale(1); } 50% { transform: translateX(-50%) scale(1.05); } 100% { transform: translateX(-50%) scale(1); } }
+
+        /* 🟢 เมนูเครื่องมือแก้ไข (ปรับให้มีปุ่มย้ายตำแหน่ง) */
+        #edit-menu { position: absolute; top: 80px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; pointer-events: auto; background: rgba(255, 255, 255, 0.95); padding: 10px 15px; border-radius: 50px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); opacity: 0; visibility: hidden; transition: all 0.3s ease; white-space: nowrap; }
+        #edit-menu.show { opacity: 1; visibility: visible; }
+        .btn-edit { background: #f5f5f5; border: 1px solid #ddd; font-size: 1rem; cursor: pointer; padding: 8px 12px; color: #5d4037; border-radius: 30px; font-family: 'Kanit'; font-weight: 600; display: flex; align-items: center; gap: 5px; transition: 0.2s;}
+        .btn-edit:active { background: #e0e0e0; transform: scale(0.95); }
+        .btn-delete { color: white; background: #f44336; border: none; }
+        .btn-delete:active { background: #d32f2f; }
+        .btn-move { color: white; background: #2196F3; border: none; }
+        .btn-move:active { background: #1976D2; }
+
+        /* แคตตาล็อกสินค้า */
+        #catalog-menu { position: absolute; bottom: 30px; left: 0; width: 100%; padding: 0 20px; box-sizing: border-box; pointer-events: auto; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; }
+        .catalog-container { display: inline-flex; gap: 15px; padding-bottom: 15px; }
+        .catalog-item { background: rgba(255, 255, 255, 0.95); border: 2px solid transparent; border-radius: 15px; padding: 15px; width: 100px; text-align: center; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.1); transition: 0.3s; display: flex; flex-direction: column; align-items: center; justify-content: center; white-space: normal;}
+        .catalog-item.active { border-color: #5d4037; background: white; transform: translateY(-10px); box-shadow: 0 10px 25px rgba(93, 64, 55, 0.3); }
+        .catalog-img { width: 60px; height: 60px; object-fit: contain; margin-bottom: 8px; border-radius: 8px; }
+        .catalog-name { font-size: 0.85rem; font-family: 'Kanit'; color: #5d4037; font-weight: 600; line-height: 1.2;}
+    </style>
+</head>
+<body>
+
+    <div id="start-screen">
+        <h1>PAN TERRA AR</h1>
+        <p>สร้างห้องในฝัน วางเฟอร์นิเจอร์ได้หลายชิ้น</p>
+        <button class="btn-start btn-ar-force" onclick="forceStartAR()">เปิดกล้องจำลองห้อง 📷</button>
+        <button class="btn-start" onclick="window.location.href='index.html'">⬅️ กลับหน้าหลัก</button>
+    </div>
+
+    <div id="ar-ui">
+        <div id="instruction-text">⏳ กำลังสแกนหาพื้น... (ขยับมือถือซ้ายขวาช้าๆ)</div>
+        
+        <button id="btn-place" onclick="placeFurniture()">👇 วางตรงนี้</button>
+
+        <div id="edit-menu">
+            <button class="btn-edit" onclick="rotateSelected(-45)">↺ หมุนซ้าย</button>
+            <button class="btn-edit btn-move" onclick="startMovingSelected()">📍 ย้ายที่</button>
+            <button class="btn-edit" onclick="rotateSelected(45)">↻ หมุนขวา</button>
+            <button class="btn-edit btn-delete" onclick="deleteSelected()">🗑️ ลบ</button>
+        </div>
+        
+        <div id="catalog-menu">
+            <div class="catalog-container" id="catalog-list"></div>
+        </div>
+    </div>
+
+    <a-scene 
+        webxr="requiredFeatures: hit-test, dom-overlay; overlayElement: #ar-ui" 
+        ar-hit-test="target:#reticle"
+        renderer="colorManagement: true;"
+        ar-planner-system>
+        
+        <a-assets id="model-assets"></a-assets>
+        <a-camera position="0 1.6 0"></a-camera>
+
+        <a-entity id="reticle" visible="false">
+            <a-ring color="#4CAF50" radius-inner="0.15" radius-outer="0.2" rotation="-90 0 0"></a-ring>
+            <a-circle color="#ffffff" radius="0.1" rotation="-90 0 0" opacity="0.8"></a-circle>
+        </a-entity>
+
+        <a-ring id="selection-ring" color="#ff9800" radius-inner="0.4" radius-outer="0.45" rotation="-90 0 0" visible="false" position="0 0.01 0"></a-ring>
+
+        <a-light type="ambient" color="#ffffff" intensity="0.7"></a-light>
+        <a-light type="directional" color="#ffffff" intensity="0.5" position="-1 2 1" castShadow="true"></a-light>
+    </a-scene>
+
+    <script>
+        const furnitureData = [
+            { id: 1, name: "Modern Sofa", image: "assets/images/sofa.png", modelFile: "assets/models/sofa.glb" },
+            { id: 4, name: "Dining Chair", image: "assets/images/wooden_dining_chair.png", modelFile: "assets/models/wooden_dining_chair.glb" },
+            { id: 9, name: "Round Table", image: "assets/images/table_ronde.png", modelFile: "assets/models/table_ronde.glb" },
+            { id: 8, name: "Japanese Lamp", image: "assets/images/japanese_lamp.png", modelFile: "assets/models/japanese_lamp.glb" },
+            { id: 16, name: "Wooden Cabinet", image: "assets/images/wooden_cupboard_with_door.png", modelFile: "assets/models/wooden_cupboard_with_door.glb" },
+            { id: 22, name: "Plant Pot", image: "assets/images/plant.png", modelFile: "assets/models/plant.glb" }
+        ];
+
+        let currentModelToPlace = '';
+        let selectedEntity = null;
+        let movingEntity = null; // 🟢 ตัวแปรสำหรับจำว่ากำลัง "ย้าย" ของชิ้นไหนอยู่
+
+        function initCatalog() {
+            const catalogList = document.getElementById('catalog-list');
+            const assetsContainer = document.getElementById('model-assets');
+
+            furnitureData.forEach((item, index) => {
+                const asset = document.createElement('a-asset-item');
+                asset.setAttribute('id', `model-${item.id}`);
+                asset.setAttribute('src', item.modelFile);
+                assetsContainer.appendChild(asset);
+
+                const btn = document.createElement('div');
+                btn.className = `catalog-item ${index === 0 ? 'active' : ''}`;
+                btn.innerHTML = `
+                    <img src="${item.image}" class="catalog-img" alt="${item.name}" onerror="this.src='https://via.placeholder.com/60x60?text=NO+IMG'">
+                    <div class="catalog-name">${item.name}</div>
+                `;
+                
+                btn.onclick = (e) => {
+                    e.stopPropagation(); 
+                    document.querySelectorAll('.catalog-item').forEach(el => el.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentModelToPlace = `#model-${item.id}`;
+                    
+                    // ถ้าย้ายของอยู่แล้วไปกดแคตตาล็อก ให้วางของเก่าลงก่อน
+                    if(movingEntity) placeFurniture(); 
+                    deselectCurrent();
+                };
+                catalogList.appendChild(btn);
+
+                if(index === 0) currentModelToPlace = `#model-${item.id}`;
+            });
+        }
+
+        function forceStartAR() {
+            let arBtn = document.querySelector('.a-enter-ar-button');
+            if (arBtn) { arBtn.click(); } 
+            else { document.querySelector('a-scene').enterAR(); }
+        }
+
+        AFRAME.registerComponent('ar-planner-system', {
+            init: function () {
+                const sceneEl = this.el;
+                sceneEl.addEventListener('enter-vr', () => {
+                    if (sceneEl.is('ar-mode')) {
+                        document.getElementById('start-screen').style.display = 'none';
+                        document.getElementById('ar-ui').style.display = 'block';
+                    }
+                });
+                sceneEl.addEventListener('exit-vr', () => {
+                    document.getElementById('start-screen').style.display = 'flex';
+                    document.getElementById('ar-ui').style.display = 'none';
+                });
+            },
+            tick: function () {
+                const reticle = document.getElementById('reticle');
+                const btnPlace = document.getElementById('btn-place');
+                const instructionText = document.getElementById('instruction-text');
+
+                if (this.el.is('ar-mode') && reticle && btnPlace) {
+                    if (reticle.object3D.visible) {
+                        btnPlace.style.display = 'block';
+                        
+                        // 🟢 ถ้ากำลัง "ย้าย" โมเดลอยู่ ให้มันขยับตามเป้าเล็งสีเขียว!
+                        if (movingEntity) {
+                            const pos = reticle.object3D.position;
+                            movingEntity.setAttribute('position', {x: pos.x, y: pos.y, z: pos.z});
+                            btnPlace.innerText = "✅ วางตำแหน่งนี้";
+                        } else {
+                            btnPlace.innerText = "👇 วางตรงนี้";
+                        }
+
+                        if(!selectedEntity && !movingEntity) {
+                            instructionText.innerHTML = "✅ เจอพื้นแล้ว!<br>กดปุ่ม 'วางตรงนี้' เพื่อจัดวางเฟอร์นิเจอร์";
+                            instructionText.style.color = "#4CAF50";
+                        }
+                    } else {
+                        btnPlace.style.display = 'none';
+                        if(!selectedEntity && !movingEntity) {
+                            instructionText.innerText = "⏳ กำลังสแกนหาพื้น... (ขยับมือถือซ้ายขวาช้าๆ)";
+                            instructionText.style.color = "#e65100";
+                        }
+                    }
+                }
+            }
+        });
+
+        // 🟢 ฟังก์ชันวางของ (ควบรวมทั้งวางของใหม่ และ วางของที่ย้ายมา)
+        function placeFurniture() {
+            const reticle = document.getElementById('reticle');
+            if (!reticle.object3D.visible) return;
+
+            if (movingEntity) {
+                // ถ้ากำลังย้ายอยู่ พอกดปุ่มนี้ คือการ "ปล่อยของลงพื้น"
+                movingEntity = null;
+                document.getElementById('instruction-text').innerHTML = "✅ วางสำเร็จ!<br>ใช้นิ้วแตะที่โมเดล เพื่อแก้ไข/หมุน/ลบ";
+                document.getElementById('instruction-text').style.color = "#4CAF50";
+                return;
+            }
+
+            deselectCurrent();
+
+            const newFurniture = document.createElement('a-entity');
+            newFurniture.setAttribute('gltf-model', currentModelToPlace);
+            
+            const pos = reticle.object3D.position;
+            newFurniture.setAttribute('position', {x: pos.x, y: pos.y, z: pos.z});
+            newFurniture.setAttribute('shadow', 'receive: false; cast: true');
+            newFurniture.setAttribute('scale', '1 1 1');
+            newFurniture.setAttribute('class', 'furniture'); // ติดแท็กไว้ให้เลเซอร์สแกนเจอ
+
+            document.querySelector('a-scene').appendChild(newFurniture);
+            
+            document.getElementById('instruction-text').innerHTML = "✅ วางสำเร็จ!<br>ใช้นิ้วแตะที่โมเดล เพื่อแก้ไข/หมุน/ลบ";
+            document.getElementById('instruction-text').style.color = "#4CAF50";
+        }
+
+        // 🟢 ระบบเลเซอร์ยิงจากนิ้ว (แก้ปัญหาแตะโมเดลไม่ติด 100%)
+        window.addEventListener('touchstart', function(e) {
+            if (movingEntity) return; // ถ้าขยับของอยู่ ห้ามกดเลือกของอื่น
+            
+            // ตรวจสอบว่าไม่ได้เผลอไปกดโดนปุ่ม UI ต่างๆ
+            if (e.touches.length === 1 && e.target.tagName !== 'BUTTON' && !e.target.closest('#catalog-menu') && !e.target.closest('#edit-menu')) {
+                
+                let touch = e.touches[0];
+                let mouse = new THREE.Vector2();
+                // แปลงจุดที่นิ้วแตะ ให้เป็นพิกัด 3D
+                mouse.x = (touch.clientX / window.innerWidth) * 2 - 1;
+                mouse.y = -(touch.clientY / window.innerHeight) * 2 + 1;
+                
+                let sceneEl = document.querySelector('a-scene');
+                let raycaster = new THREE.Raycaster();
+                raycaster.setFromCamera(mouse, sceneEl.camera); // ยิงเลเซอร์จากกล้องทะลุนิ้ว
+                
+                // ค้นหาว่าเลเซอร์ชนกับอะไรในฉากบ้าง
+                let intersects = raycaster.intersectObjects(sceneEl.object3D.children, true);
+                
+                let clickedFurniture = null;
+                for(let i=0; i<intersects.length; i++) {
+                    let obj = intersects[i].object;
+                    // ไต่ขึ้นไปหาตัวแม่ที่มีคลาส furniture
+                    while(obj) {
+                        if (obj.el && obj.el.classList && obj.el.classList.contains('furniture')) {
+                            clickedFurniture = obj.el;
+                            break;
+                        }
+                        obj = obj.parent;
+                    }
+                    if (clickedFurniture) break;
+                }
+
+                if (clickedFurniture) {
+                    selectFurniture(clickedFurniture);
+                } else {
+                    deselectCurrent(); // ถ้าแตะโดนพื้นว่างๆ ให้ยกเลิกการเลือก
+                }
+            }
+        }, {passive: true});
+
+        function selectFurniture(entity) {
+            selectedEntity = entity;
+            const ring = document.getElementById('selection-ring');
+            ring.setAttribute('visible', 'true');
+            entity.appendChild(ring); // ย้ายวงแหวนไปอยู่ใต้ของที่เลือก
+            
+            document.getElementById('edit-menu').classList.add('show');
+            document.getElementById('instruction-text').innerText = "🛠️ เลือกเฟอร์นิเจอร์แล้ว สามารถย้าย หมุน หรือลบได้";
+            document.getElementById('instruction-text').style.color = "#5d4037";
+            document.getElementById('btn-place').style.display = 'none'; // ซ่อนปุ่มวางชั่วคราว
+        }
+
+        function deselectCurrent() {
+            if (!selectedEntity) return;
+            selectedEntity = null;
+            const ring = document.getElementById('selection-ring');
+            ring.setAttribute('visible', 'false');
+            document.querySelector('a-scene').appendChild(ring); // คืนวงแหวนกลับสู่ฉากหลัก
+            document.getElementById('edit-menu').classList.remove('show');
+        }
+
+        // 🟢 ฟังก์ชันใหม่: สั่งย้ายตำแหน่ง
+        function startMovingSelected() {
+            if (!selectedEntity) return;
+            movingEntity = selectedEntity; // เปลี่ยนสถานะเป็น "กำลังย้าย"
+            deselectCurrent(); // ปิดเมนูและวงแหวน
+            
+            document.getElementById('instruction-text').innerHTML = "เล็งหาพื้นที่ใหม่...<br>แล้วกดปุ่ม '✅ วางตำแหน่งนี้'";
+            document.getElementById('instruction-text').style.color = "#2196F3";
+        }
+
+        function rotateSelected(degrees) {
+            if (!selectedEntity) return;
+            const currentRot = selectedEntity.getAttribute('rotation') || {x:0, y:0, z:0};
+            selectedEntity.setAttribute('rotation', {x: currentRot.x, y: currentRot.y + degrees, z: currentRot.z});
+        }
+
+        function deleteSelected() {
+            if (!selectedEntity) return;
+            const ring = document.getElementById('selection-ring');
+            ring.setAttribute('visible', 'false');
+            document.querySelector('a-scene').appendChild(ring);
+            
+            selectedEntity.parentNode.removeChild(selectedEntity);
+            selectedEntity = null;
+            document.getElementById('edit-menu').classList.remove('show');
+            
+            document.getElementById('instruction-text').innerText = "🗑️ ลบโมเดลเรียบร้อยแล้ว";
+            setTimeout(() => { document.getElementById('instruction-text').innerText = "เล็งเป้าแล้วกดวางของชิ้นใหม่ได้เลย"; }, 2000);
+        }
+
+        window.onload = initCatalog;
+    </script>
+</body>
+</html>

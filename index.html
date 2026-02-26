@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PAN TERRA - AR Furniture</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
+    
+    <style>
+        :root {
+            --primary: #5d4037;
+            --accent: #8d6e63;
+            --bg: #fbf9f6;
+            --card-bg: #ffffff;
+            --shadow: rgba(93, 64, 55, 0.1);
+        }
+
+        body { margin: 0; font-family: 'Kanit', sans-serif; background-color: var(--bg); color: var(--primary); line-height: 1.6; scroll-behavior: smooth; }
+
+        /* Navbar */
+        nav { background: white; padding: 1rem 5%; box-shadow: 0 4px 20px var(--shadow); display: flex; justify-content: center; border-bottom: 1px solid #efebe9; position: sticky; top: 0; z-index: 1000;}
+        .logo { font-size: 1.5rem; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; border: 2px solid var(--primary); padding: 8px 25px; border-radius: 50px; background: rgba(255, 255, 255, 0.5); backdrop-filter: blur(5px); display: flex; align-items: center; gap: 12px; cursor: pointer; transition: all 0.4s ease; }
+        .logo-icon { width: 24px; height: 24px; transition: transform 0.6s ease; }
+        .logo:hover { background-color: var(--primary); color: white; letter-spacing: 3px; box-shadow: 0 5px 20px rgba(93, 64, 55, 0.25); border-color: transparent; }
+        .logo:hover .logo-icon { transform: rotate(180deg); }
+
+        /* Hero Section */
+        .hero { background: linear-gradient(135deg, #fdfbf7 0%, #eaddcf 100%); padding: 80px 20px 40px; text-align: center; position: relative; }
+        .hero-container { display: flex; align-items: center; justify-content: center; gap: 40px; max-width: 1000px; margin: 0 auto; text-align: left; padding-bottom: 60px; }
+        .hero-text { flex: 1; }
+        .hero-text h1 { margin: 0 0 20px; font-size: 3rem; color: #3e2723; line-height: 1.2; }
+        .hero-text p { font-size: 1.15rem; color: #6d4c41; font-weight: 300; margin-bottom: 30px; }
+        .hero-image { flex: 1; display: flex; justify-content: center; }
+        @media (max-width: 768px) { .hero-container { flex-direction: column; text-align: center; } .hero-text h1 { font-size: 2.2rem; } .hero-image { width: 100%; height: 300px; } }
+
+        /* Features */
+        .features { display: flex; justify-content: center; gap: 40px; padding: 60px 20px; background: #fffbf7; margin-bottom: 40px; flex-wrap: wrap; border-top: 1px solid #efebe9; border-bottom: 1px solid #efebe9; }
+        .feature-item { text-align: center; padding: 20px; width: 220px; transition: transform 0.3s; background: white; border-radius: 15px; box-shadow: 0 5px 15px rgba(93, 64, 55, 0.05); }
+        .feature-item:hover { transform: translateY(-8px); box-shadow: 0 10px 25px rgba(93, 64, 55, 0.1); }
+        .feature-item .icon { font-size: 3rem; margin-bottom: 15px; display: inline-block; }
+        .feature-item h3 { font-size: 1.15rem; color: var(--primary); margin: 0 0 8px; font-weight: 600; }
+        .feature-item p { font-size: 0.95rem; color: #8d6e63; margin: 0; line-height: 1.5; }
+
+        /* 🟢 Selection Categories (สำหรับเลือกห้อง และ เลือกเฟอร์นิเจอร์) */
+        .category-section { padding: 30px 20px; max-width: 1100px; margin: 0 auto; text-align: center; }
+        .category-grid { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-top: 25px; }
+        .category-card { background: white; border: 2px solid #efebe9; border-radius: 20px; padding: 25px 15px; width: 150px; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 8px 25px rgba(93, 64, 55, 0.05); }
+        .category-card:hover { transform: translateY(-8px); border-color: var(--accent); box-shadow: 0 15px 35px rgba(93, 64, 55, 0.15); }
+        .category-icon { font-size: 3rem; margin-bottom: 10px; display: inline-block; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1)); }
+        .category-card h3 { margin: 0; font-size: 1.1rem; color: var(--primary); font-weight: 600; }
+        .section-divider { margin: 40px auto; width: 50%; border-top: 2px dashed #efebe9; }
+
+        /* Products Section */
+        .container { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
+        h2 { text-align: center; font-weight: 400; color: var(--primary); }
+        .btn-back { background: white; border: 2px solid #efebe9; color: var(--accent); font-size: 1rem; font-family: 'Kanit', sans-serif; cursor: pointer; padding: 10px 25px; border-radius: 50px; transition: all 0.3s; box-shadow: 0 4px 10px rgba(93, 64, 55, 0.05); margin-bottom: 20px;}
+        .btn-back:hover { background-color: var(--accent); color: white; border-color: var(--accent); }
+
+        .filter-buttons { display: flex; justify-content: center; gap: 10px; margin-bottom: 40px; flex-wrap: wrap; }
+        .btn-filter { padding: 8px 25px; border: 1px solid #d7ccc8; background: white; border-radius: 50px; cursor: pointer; font-family: 'Kanit', sans-serif; font-size: 0.95rem; transition: all 0.3s; color: #8d6e63; }
+        .btn-filter:hover { border-color: var(--accent); color: var(--accent); background: #fff8f6; }
+        .btn-filter.active { background: var(--accent); color: white; border-color: var(--accent); box-shadow: 0 5px 15px rgba(141, 110, 99, 0.4); }
+
+        .product-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
+        .product-card { background: var(--card-bg); border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px var(--shadow); transition: transform 0.3s; border: 1px solid #f5f5f5; display: flex; flex-direction: column;}
+        .product-card:hover { transform: translateY(-8px); box-shadow: 0 15px 40px rgba(93, 64, 55, 0.15); }
+        .model-wrapper { height: 250px; background: #fafafa; position: relative; }
+        model-viewer { width: 100%; height: 100%; --poster-color: transparent; }
+        
+        .product-info { padding: 20px; text-align: center; display: flex; flex-direction: column; flex-grow: 1;}
+        .category-tag { font-size: 0.75rem; background: #efebe9; padding: 5px 12px; border-radius: 20px; color: #795548; display: inline-block; margin-bottom: 10px; align-self: center;}
+        .product-info h3 { margin: 5px 0 5px; font-size: 1.3rem; font-weight: 500; }
+        .product-price { color: var(--accent); font-size: 1.1rem; font-weight: 600; margin-bottom: 15px;}
+        
+        /* ปุ่มในการ์ดสินค้า */
+        .card-actions { display: flex; gap: 10px; margin-top: auto; }
+        .btn-detail { flex: 1; background: white; border: 1px solid var(--accent); color: var(--accent); padding: 10px; border-radius: 50px; cursor: pointer; font-family: 'Kanit', sans-serif; font-size: 0.9rem; transition: all 0.3s; }
+        .btn-detail:hover { background: #fff8f6; }
+        .btn-ar { flex: 1; background: var(--accent); color: white; border: 1px solid var(--accent); padding: 10px; border-radius: 50px; cursor: pointer; font-family: 'Kanit', sans-serif; font-size: 0.9rem; transition: all 0.3s; box-shadow: 0 5px 15px rgba(141, 110, 99, 0.3); }
+        .btn-ar:hover { background: #6d4c41; border-color: #6d4c41; }
+
+        /* Modal (ป๊อปอัปรายละเอียดสินค้า) */
+        .modal-overlay { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(93, 64, 55, 0.4); backdrop-filter: blur(5px); align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s ease; }
+        .modal-overlay.show { display: flex; opacity: 1; }
+        .modal-content { background-color: white; padding: 30px; border-radius: 20px; width: 90%; max-width: 500px; position: relative; box-shadow: 0 15px 40px rgba(0,0,0,0.2); transform: translateY(30px); transition: transform 0.3s ease; }
+        .modal-overlay.show .modal-content { transform: translateY(0); }
+        .close-btn { position: absolute; top: 20px; right: 25px; font-size: 30px; font-weight: bold; color: #ccc; cursor: pointer; line-height: 1; transition: color 0.3s; }
+        .close-btn:hover { color: var(--primary); }
+        
+        .modal-header h2 { margin: 0 0 5px; color: var(--primary); text-align: left; font-size: 1.5rem;}
+        .modal-price { font-size: 1.3rem; color: var(--accent); font-weight: 600; margin: 0 0 20px; }
+        
+        .modal-details { background: #fafafa; padding: 20px; border-radius: 15px; margin-bottom: 25px;}
+        .modal-details p { margin: 0 0 12px; font-size: 0.95rem; color: #555; display: flex; align-items: flex-start;}
+        .modal-details p:last-child { margin-bottom: 0; }
+        .modal-details strong { min-width: 90px; color: var(--primary); display: inline-block;}
+        .modal-details span { flex: 1; }
+
+        /* Floating Scroll Buttons */
+        .floating-scroll-nav { position: fixed; bottom: 30px; right: 30px; display: flex; flex-direction: column; gap: 15px; z-index: 999; }
+        .float-btn { width: 50px; height: 50px; border-radius: 50%; border: none; background-color: white; color: var(--primary); box-shadow: 0 4px 15px rgba(93, 64, 55, 0.2); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; opacity: 0; visibility: hidden; transform: translateY(20px); }
+        .float-btn.show { opacity: 1; visibility: visible; transform: translateY(0); }
+        .float-btn:hover { background-color: var(--primary); color: white; transform: translateY(-5px); box-shadow: 0 8px 25px rgba(93, 64, 55, 0.3); }
+
+        footer { background: var(--primary); color: white; text-align: center; padding: 50px 20px; margin-top: 80px; }
+        footer p { opacity: 0.8; font-weight: 300; margin: 5px 0; }
+        .bubble-pop { opacity: 0; transform: scale(0.8) translateY(20px); transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .bubble-pop.active { opacity: 1; transform: scale(1) translateY(0); }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="logo" onclick="location.reload()">
+            <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M2 12h20"></path>
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+            </svg>
+            <span>PAN TERRA</span>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <div class="hero-container">
+            <div class="hero-text">
+                <h1>แต่งห้อง<br>เสมือนจริง</h1>
+                <p>เปลี่ยนบ้านให้เป็นสตูดิโอด้วยเฟอร์นิเจอร์หลากหลาย Style ลองวางผ่าน AR ได้ทันทีไม่ต้องเดา</p>
+                <button class="btn-ar" onclick="window.scrollTo({top: 800, behavior: 'smooth'})" style="width: auto; padding: 12px 35px; margin-top: 20px;">
+                    เริ่มตกแต่งเลย
+                </button>
+                
+                <button onclick="window.location.href='ar-planner.html'" style="background: #ffffff; color: #5d4037; border: 2px solid #5d4037; padding: 12px 35px; border-radius: 50px; font-family: 'Kanit', sans-serif; cursor: pointer; font-size: 1.1rem; margin-top: 15px; font-weight: 600; box-shadow: 0 5px 15px rgba(93, 64, 55, 0.1); transition: all 0.3s ease; display: block; width: fit-content; text-align: center;">
+                    🛠️ เปิดโหมดจัดห้อง AR (วางหลายชิ้น)
+                </button>
+                
+            </div>
+            <div class="hero-image">
+                <model-viewer src="assets/models/wooden_dining_chair.glb" camera-controls auto-rotate shadow-intensity="1" disable-zoom style="width: 100%; height: 400px; --poster-color: transparent; background-color: transparent;"></model-viewer>
+            </div>
+        </div>
+    </header>
+
+    <section class="features">
+        <div class="feature-item"><div class="icon">👆</div><h3>เลือกเฟอร์นิเจอร์</h3><p>กดเลือกสินค้าที่คุณสนใจ</p></div>
+        <div class="feature-item"><div class="icon">📱</div><h3>กดปุ่ม AR</h3><p>เพื่อเปิดกล้องมือถือของคุณ</p></div>
+        <div class="feature-item"><div class="icon">🏠</div><h3>วางในพื้นที่จริง</h3><p>ส่องกล้องไปที่พื้นเพื่อวางของ</p></div>
+    </section>
+
+    <div id="main-selection-area">
+        
+        <section class="category-section" id="room-selection">
+            <h2 class="bubble-pop">🏠 เลือกแต่งตามห้อง</h2>
+            <div class="category-grid bubble-pop">
+                <div class="category-card" onclick="selectRoom('living_room', 'ห้องนั่งเล่น')"><div class="category-icon">🛋️</div><h3>ห้องนั่งเล่น</h3></div>
+                <div class="category-card" onclick="selectRoom('bedroom', 'ห้องนอน')"><div class="category-icon">🛏️</div><h3>ห้องนอน</h3></div>
+                <div class="category-card" onclick="selectRoom('workspace', 'ห้องทำงาน')"><div class="category-icon">💻</div><h3>ห้องทำงาน</h3></div>
+                <div class="category-card" onclick="selectRoom('dining_room', 'ห้องทานอาหาร')"><div class="category-icon">🍽️</div><h3>ห้องทานอาหาร</h3></div>
+                <div class="category-card" onclick="selectRoom('kitchen', 'ห้องครัว')"><div class="category-icon">🍳</div><h3>ห้องครัว</h3></div>
+                <div class="category-card" onclick="selectRoom('bathroom', 'ห้องน้ำ')"><div class="category-icon">🛁</div><h3>ห้องน้ำ</h3></div>
+                <div class="category-card" onclick="selectRoom('outdoor', 'พื้นที่นอกบ้าน')"><div class="category-icon">🌳</div><h3>พื้นที่นอกบ้าน</h3></div>
+            </div>
+        </section>
+
+        <div class="section-divider bubble-pop"></div>
+
+        <section class="category-section" id="furniture-selection" style="padding-top: 0;">
+            <h2 class="bubble-pop">🪑 เลือกตามประเภทเฟอร์นิเจอร์</h2>
+            <div class="category-grid bubble-pop">
+                <div class="category-card" onclick="selectCategory('sofa', 'โซฟา')"><div class="category-icon">🛋️</div><h3>โซฟา</h3></div>
+                <div class="category-card" onclick="selectCategory('chair', 'เก้าอี้')"><div class="category-icon">🪑</div><h3>เก้าอี้</h3></div>
+                <div class="category-card" onclick="selectCategory('table', 'โต๊ะ')"><div class="category-icon">🪵</div><h3>โต๊ะ</h3></div>
+                <div class="category-card" onclick="selectCategory('bed', 'เตียงนอน')"><div class="category-icon">🛏️</div><h3>เตียงนอน</h3></div>
+                <div class="category-card" onclick="selectCategory('cupboard', 'ตู้เก็บของ')"><div class="category-icon">🗄️</div><h3>ตู้เก็บของ</h3></div>
+                <div class="category-card" onclick="selectCategory('shelf', 'ชั้นวางของ')"><div class="category-icon">📚</div><h3>ชั้นวางของ</h3></div>
+                <div class="category-card" onclick="selectCategory('lamp', 'โคมไฟ')"><div class="category-icon">💡</div><h3>โคมไฟ</h3></div>
+                <div class="category-card" onclick="selectCategory('mirror', 'กระจก')"><div class="category-icon">🪞</div><h3>กระจก</h3></div>
+                <div class="category-card" onclick="selectCategory('decor', 'ของตกแต่ง')"><div class="category-icon">🪴</div><h3>ของตกแต่ง</h3></div>
+            </div>
+        </section>
+
+    </div>
+
+    <section class="container" id="product-section" style="display: none;">
+        <div style="text-align: center;">
+            <button onclick="goBackToHome()" class="btn-back">⬅️ กลับไปหน้าหมวดหมู่</button>
+        </div>
+        
+        <h2 id="current-section-title" style="margin-bottom: 20px;">หมวดหมู่สินค้า</h2>
+        
+        <div class="filter-buttons" id="sub-category-filters"></div>
+        
+        <div id="product-list" class="product-grid"></div>
+    </section>
+
+    <div id="product-modal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <div class="modal-header">
+                <h2 id="modal-title">ชื่อสินค้า</h2>
+                <p id="modal-price" class="modal-price">0 ฿</p>
+            </div>
+            <div class="modal-details">
+                <p><strong>📝 รายละเอียด:</strong> <span id="modal-desc">รายละเอียดสินค้า</span></p>
+                <p><strong>🛠️ วัสดุ:</strong> <span id="modal-material">วัสดุที่ใช้</span></p>
+                <p><strong>📏 ขนาด:</strong> <span id="modal-size">กว้าง x ยาว x สูง</span></p>
+                <p><strong>📍 สถานที่ขาย:</strong> <span id="modal-store">ลิงก์ หรือ สาขา</span></p>
+            </div>
+            <button class="btn-ar" id="modal-ar-btn" style="width: 100%; padding: 15px; font-size: 1.1rem;">ลองวาง AR ในห้องจริง 📱</button>
+        </div>
+    </div>
+
+    <div class="floating-scroll-nav">
+        <button id="btn-scroll-up" class="float-btn" onclick="scrollPage('up')" title="เลื่อนขึ้น"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg></button>
+        <button id="btn-scroll-down" class="float-btn" onclick="scrollPage('down')" title="เลื่อนลง"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></button>
+    </div>
+
+    <footer>
+        <div style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 15px;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><circle cx="12" cy="12" r="10"></circle><path d="M2 12h20"></path><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+            <span style="font-weight: bold; font-size: 1.2rem;">PAN TERRA</span>
+        </div>
+        <p>ออกแบบบ้านในฝัน ด้วยเทคโนโลยี AR</p>
+        <p class="copyright">© 2024 Pan Terra. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // ฐานข้อมูลสินค้า (สมมุติ)
+        const furnitureData = [
+            // โซฟา
+            { id: 1, name: "Modern Sofa", category: "sofa", room: ["living_room"], price: 15900, description: "โซฟานั่งสบาย สไตล์มินิมอล", modelFile: "assets/models/sofa.glb", material: "ผ้าหุ้มกันน้ำ", size: "ก. 200 x ล. 90 x ส. 85 ซม.", store: "IKEA" },
+            { id: 2, name: "Yellow Divan Sofa", category: "sofa", room: ["living_room"], price: 8900, description: "โซฟาสีเหลืองมัสตาร์ด", modelFile: "assets/models/sofa__divan_mebel.glb", material: "ผ้ากำมะหยี่", size: "ก. 180 x ล. 85 ซม.", store: "Index Living Mall" },
+            { id: 3, name: "Black Divan Sofa", category: "sofa", room: ["living_room", "workspace"], price: 13500, description: "โซฟาสีดำ ทรงกว้าง", modelFile: "assets/models/black_sofa_divan.glb", material: "หนัง PU เกรดพรีเมียม", size: "ก. 220 x ล. 100 ซม.", store: "SB Design Square" },
+            // เก้าอี้
+            { id: 4, name: "Wooden Dining Chair", category: "chair", room: ["dining_room", "workspace", "kitchen"], price: 2500, description: "เก้าอี้ไม้เอนกประสงค์", modelFile: "assets/models/wooden_dining_chair.glb", material: "ไม้ยางพาราแท้", size: "ก. 45 x ล. 50 ซม.", store: "NocNoc" },
+            { id: 19, name: "Outdoor Lounge Chair", category: "chair", room: ["outdoor", "living_room"], price: 1850, description: "เก้าอี้พักผ่อนนอกบ้าน", modelFile: "assets/models/outdoor_chair.glb", material: "หวายเทียม PE", size: "ก. 65 x ล. 70 ซม.", store: "Global House" },
+            // โคมไฟ
+            { id: 5, name: "Table Lamp 01", category: "lamp", room: ["bedroom", "workspace", "living_room"], price: 1290, description: "โคมไฟตั้งโต๊ะแสงนวลตา", modelFile: "assets/models/table_lamp_01.glb", material: "พลาสติก ABS", size: "ก. 15 x ส. 40 ซม.", store: "Shopee" },
+            { id: 8, name: "Japanese Lamp", category: "lamp", room: ["bedroom", "living_room", "dining_room"], price: 1590, description: "โคมไฟสไตล์ญี่ปุ่น", modelFile: "assets/models/japanese_lamp.glb", material: "โครงไม้ไผ่แท้", size: "ก. 20 x ส. 35 ซม.", store: "Muji" },
+            // โต๊ะ
+            { id: 9, name: "Round Table", category: "table", room: ["living_room", "dining_room", "kitchen"], price: 3500, description: "โต๊ะกลมเอนกประสงค์", modelFile: "assets/models/table_ronde.glb", material: "หน้าท็อปหินอ่อน", size: "เส้นผ่านศูนย์กลาง 80 ซม.", store: "IKEA" },
+            { id: 10, name: "Folding Table", category: "table", room: ["workspace", "bedroom", "outdoor"], price: 1590, description: "โต๊ะพับเก็บได้", modelFile: "assets/models/folding_table.glb", material: "พลาสติก HDPE", size: "ก. 120 x ล. 60 ซม.", store: "HomePro" },
+            { id: 11, name: "Industrial Table", category: "table", room: ["workspace", "dining_room"], price: 4900, description: "โต๊ะทำงานสไตล์ลอฟท์", modelFile: "assets/models/industrial_table.glb", material: "ไม้สนแท้, โครงเหล็ก", size: "ก. 140 x ล. 60 ซม.", store: "ร้านเฟอร์นิเจอร์สั่งทำ" },
+            { id: 12, name: "Bar Table", category: "table", room: ["dining_room", "living_room", "outdoor"], price: 3900, description: "โต๊ะบาร์ทรงสูง", modelFile: "assets/models/bar_table.glb", material: "ไม้อัดเกรด A", size: "ก. 120 x ล. 40 ซม.", store: "Index Living Mall" },
+            { id: 13, name: "Mahogany Table", category: "table", room: ["dining_room"], price: 18500, description: "โต๊ะทานข้าวหรูหรา", modelFile: "assets/models/mahogany_table.glb", material: "ไม้มะฮอกกานีแท้", size: "ก. 180 x ล. 90 ซม.", store: "SB Design Square" },
+            { id: 17, name: "Kitchen Island", category: "table", room: ["kitchen", "dining_room"], price: 12900, description: "เคาน์เตอร์ครัว", modelFile: "assets/models/kitchen_island.glb", material: "ไม้ MDF", size: "ก. 120 x ล. 60 ซม.", store: "ไทวัสดุ" },
+            // ตู้เก็บของ / เตียง / ของตกแต่ง
+            { id: 14, name: "Vintage Cupboard", category: "cupboard", room: ["bedroom", "living_room", "dining_room"], price: 8500, description: "ตู้ไม้เก็บของ", modelFile: "assets/models/cupboard.glb", material: "ไม้สักขัด", size: "ก. 80 x ล. 40 ซม.", store: "ตลาดนัดจตุจักร" },
+            { id: 15, name: "Office Cabinet", category: "cupboard", room: ["workspace"], price: 3200, description: "ตู้ลิ้นชักเหล็ก", modelFile: "assets/models/cupboard_desk_game_asset.glb", material: "เหล็กพ่นสีฝุ่น", size: "ก. 40 x ล. 50 ซม.", store: "OfficeMate" },
+            { id: 16, name: "Wooden Cabinet", category: "cupboard", room: ["bedroom", "living_room", "kitchen"], price: 5500, description: "ตู้ไม้มินิมอล", modelFile: "assets/models/wooden_cupboard_with_door.glb", material: "ไม้พาร์ติเคิลบอร์ด", size: "ก. 80 x ล. 40 ซม.", store: "IKEA" },
+            { id: 18, name: "Bathroom Vanity", category: "cupboard", room: ["bathroom"], price: 4200, description: "ตู้ใต้อ่างล้างหน้า", modelFile: "assets/models/bathroom_vanity.glb", material: "พลาสติก PVC กันน้ำ", size: "ก. 60 x ล. 45 ซม.", store: "HomePro" },
+            { id: 20, name: "Minimalist Bed (5ft)", category: "bed", room: ["bedroom"], price: 18500, description: "เตียงนอนสไตล์มินิมอล", modelFile: "assets/models/bed.glb", material: "ไม้โอ๊คแท้", size: "สำหรับที่นอน 5 ฟุต", store: "SB Design Square" },
+            { id: 21, name: "Wall Shelf", category: "shelf", room: ["living_room", "workspace", "bedroom", "kitchen", "bathroom"], price: 990, description: "ชั้นวางของติดผนัง", modelFile: "assets/models/shelf.glb", material: "ไม้ MDF", size: "ก. 80 x ล. 20 ซม.", store: "IKEA" },
+            { id: 22, name: "Indoor Plant Pot", category: "decor", room: ["living_room", "bathroom", "outdoor", "bedroom"], price: 850, description: "ต้นไม้ปลอมพรีเมียม", modelFile: "assets/models/plant.glb", material: "กระถางเซรามิก", size: "ส. 60 ซม.", store: "Index" },
+            { id: 23, name: "Round Mirror", category: "mirror", room: ["bathroom", "bedroom", "living_room"], price: 1290, description: "กระจกเงาทรงกลม", modelFile: "assets/models/mirror.glb", material: "กระจกนิรภัย", size: "เส้นผ่านศูนย์กลาง 60 ซม.", store: "HomePro" }
+        ];
+
+        // 🟢 ระบบจัดการโหมดการค้นหา (Room หรือ Category)
+        let currentMode = ''; 
+        let currentSelectionKey = '';
+
+        // 1. ถ้ายูสเซอร์เลือก "หาตามห้อง"
+        function selectRoom(roomKey, roomName) {
+            currentMode = 'room';
+            currentSelectionKey = roomKey;
+            
+            document.getElementById('main-selection-area').style.display = 'none';
+            document.getElementById('product-section').style.display = 'block';
+            document.getElementById('current-section-title').innerText = 'แต่ง: ' + roomName;
+
+            generateFilters();
+            renderProducts(roomKey, 'all');
+            window.scrollTo({ top: document.getElementById('product-section').offsetTop - 20, behavior: "smooth" });
+        }
+
+        // 2. ถ้ายูสเซอร์เลือก "หาตามเฟอร์นิเจอร์"
+        function selectCategory(categoryKey, categoryName) {
+            currentMode = 'category';
+            currentSelectionKey = categoryKey;
+
+            document.getElementById('main-selection-area').style.display = 'none';
+            document.getElementById('product-section').style.display = 'block';
+            document.getElementById('current-section-title').innerText = 'หมวดหมู่: ' + categoryName;
+
+            generateFilters();
+            renderProducts('all', categoryKey);
+            window.scrollTo({ top: document.getElementById('product-section').offsetTop - 20, behavior: "smooth" });
+        }
+
+        // 3. ปุ่มกลับหน้าแรก
+        function goBackToHome() {
+            document.getElementById('main-selection-area').style.display = 'block';
+            document.getElementById('product-section').style.display = 'none';
+            window.scrollTo({ top: document.getElementById('main-selection-area').offsetTop - 50, behavior: "smooth" });
+        }
+
+        // 4. สร้างปุ่มกรองย่อยแบบโคตรฉลาด
+        function generateFilters() {
+            const filterContainer = document.getElementById('sub-category-filters');
+            filterContainer.innerHTML = '';
+            
+            if (currentMode === 'room') {
+                // ถ้ามาทาง 'ห้อง' -> ปุ่มย่อยต้องเป็น 'ประเภทเฟอร์นิเจอร์'
+                let categoriesInRoom = new Set();
+                furnitureData.forEach(item => { if (item.room.includes(currentSelectionKey)) categoriesInRoom.add(item.category); });
+
+                filterContainer.innerHTML += `<button class="btn-filter active" onclick="filterData('${currentSelectionKey}', 'all', this)">ทั้งหมด</button>`;
+                
+                const categoryNames = { chair: "เก้าอี้", sofa: "โซฟา", table: "โต๊ะ", lamp: "โคมไฟ", cupboard: "ตู้เก็บของ", bed: "เตียงนอน", shelf: "ชั้นวางของ", decor: "ของตกแต่ง", mirror: "กระจก" };
+                categoriesInRoom.forEach(cat => {
+                    filterContainer.innerHTML += `<button class="btn-filter" onclick="filterData('${currentSelectionKey}', '${cat}', this)">${categoryNames[cat] || cat}</button>`;
+                });
+
+            } else if (currentMode === 'category') {
+                // ถ้ามาทาง 'เฟอร์นิเจอร์' -> ปุ่มย่อยต้องเป็น 'ห้องต่างๆ'
+                let roomsWithCategory = new Set();
+                furnitureData.forEach(item => { if (item.category === currentSelectionKey) item.room.forEach(r => roomsWithCategory.add(r)); });
+
+                filterContainer.innerHTML += `<button class="btn-filter active" onclick="filterData('all', '${currentSelectionKey}', this)">ทุกห้อง</button>`;
+                
+                const roomNames = { living_room: "ห้องนั่งเล่น", bedroom: "ห้องนอน", workspace: "ห้องทำงาน", dining_room: "ห้องทานอาหาร", kitchen: "ห้องครัว", bathroom: "ห้องน้ำ", outdoor: "นอกบ้าน" };
+                roomsWithCategory.forEach(r => {
+                    filterContainer.innerHTML += `<button class="btn-filter" onclick="filterData('${r}', '${currentSelectionKey}', this)">${roomNames[r] || r}</button>`;
+                });
+            }
+        }
+
+        function filterData(roomKey, categoryKey, btnElement) {
+            renderProducts(roomKey, categoryKey);
+            document.querySelectorAll('#sub-category-filters .btn-filter').forEach(b => b.classList.remove('active'));
+            btnElement.classList.add('active');
+        }
+
+        // 5. แสดงผลสินค้าตามฟิลเตอร์
+        function renderProducts(roomFilter, categoryFilter) {
+            const container = document.getElementById('product-list');
+            container.innerHTML = ''; 
+
+            furnitureData.forEach(item => {
+                // เช็คว่าตรงกับเงื่อนไขการค้นหาหรือไม่
+                const isInRoom = (roomFilter === 'all' || item.room.includes(roomFilter));
+                const isInCategory = (categoryFilter === 'all' || item.category === categoryFilter);
+
+                if (isInRoom && isInCategory) {
+                    const card = document.createElement('div');
+                    card.className = 'product-card bubble-pop active';
+                    const viewerId = `model-${item.id}`;
+                    const formattedPrice = item.price.toLocaleString('th-TH');
+
+                    card.innerHTML = `
+                        <div class="model-wrapper">
+                            <model-viewer id="${viewerId}" src="${item.modelFile}" alt="${item.name}"
+                                ar ar-modes="scene-viewer webxr quick-look" camera-controls shadow-intensity="1" auto-rotate reveal="auto"
+                                style="width: 100%; height: 100%;">
+                            </model-viewer>
+                        </div>
+                        <div class="product-info">
+                            <span class="category-tag">${item.category.toUpperCase()}</span>
+                            <h3>${item.name}</h3>
+                            <div class="product-price">฿ ${formattedPrice}</div>
+                            
+                            <div class="card-actions">
+                                <button class="btn-detail" onclick="openModal(${item.id}, '${viewerId}')">📋 รายละเอียด</button>
+                                <button class="btn-ar" onclick="document.getElementById('${viewerId}').activateAR()">วาง AR 📱</button>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                }
+            });
+        }
+
+        // --- ระบบป๊อปอัปรายละเอียด (Modal) ---
+        function openModal(productId, viewerId) {
+            const item = furnitureData.find(f => f.id === productId);
+            if (!item) return;
+
+            document.getElementById('modal-title').innerText = item.name;
+            document.getElementById('modal-price').innerText = '฿ ' + item.price.toLocaleString('th-TH');
+            document.getElementById('modal-desc').innerText = item.description;
+            document.getElementById('modal-material').innerText = item.material;
+            document.getElementById('modal-size').innerText = item.size;
+            document.getElementById('modal-store').innerText = item.store;
+
+            const arBtn = document.getElementById('modal-ar-btn');
+            arBtn.onclick = function() { closeModal(); document.getElementById(viewerId).activateAR(); };
+
+            document.getElementById('product-modal').classList.add('show');
+        }
+
+        function closeModal() { document.getElementById('product-modal').classList.remove('show'); }
+        window.onclick = function(event) { if (event.target === document.getElementById('product-modal')) closeModal(); }
+
+        // --- แอนิเมชัน และ ปุ่มเลื่อนขึ้นลง ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const observer = new IntersectionObserver((entries) => { entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('active'); }); }, { threshold: 0.1 });
+            setTimeout(() => { document.querySelectorAll('.bubble-pop').forEach(el => observer.observe(el)); }, 100);
+        });
+
+        function scrollPage(direction) {
+            const scrollAmount = window.innerHeight * 0.7;
+            if (direction === 'up') window.scrollBy({ top: -scrollAmount, behavior: 'smooth' });
+            else if (direction === 'down') window.scrollBy({ top: scrollAmount, behavior: 'smooth' });
+        }
+
+        window.addEventListener('scroll', () => {
+            const btnUp = document.getElementById('btn-scroll-up');
+            const btnDown = document.getElementById('btn-scroll-down');
+            const scrollY = window.scrollY;
+            const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+
+            if (scrollY > 300) btnUp.classList.add('show'); else btnUp.classList.remove('show');
+            if (scrollY >= maxScroll - 50) btnDown.classList.remove('show'); else btnDown.classList.add('show');
+        });
+        window.dispatchEvent(new Event('scroll'));
+    </script>
+</body>
+</html>
